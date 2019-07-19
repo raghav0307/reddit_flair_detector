@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<style>
+form {
+    margin: auto;
+    width: 35%;
+}.result {
+    margin: auto;
+    width: 35%;
+    border: 1px solid #ccc;
+}
+</style><head>
+    <title>Flair Prediction</title>
+</head>
+<form action="{{ url_for('main') }}" method="POST">
+    <fieldset>
+        <legend>Input values:</legend>
+        Post Link:
+        <input name="post_url" type="string" required>
+        <br>
+        <br>
+        <input type="submit">
+    </fieldset>
+</form>
+<br>
+<div class="result" align="center">
+    {% if result %}
+        {% for variable, value in original_input.items() %}
+            <b>{{ variable }}</b> : {{ value }} <br>
+        {% endfor %}
+        <br>
+        <br> Predicted flair of post:
+           <p style="font-size:50px">{{ result }}</p>
+    {% endif %}
+</div></html>
