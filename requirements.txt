@@ -2,3 +2,10 @@ flask
 praw
 datetime
 gunicorn
+pandas
+json
+numpy
+sklearn
+re
+nltk
+keras
