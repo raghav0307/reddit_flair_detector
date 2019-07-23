@@ -4,17 +4,18 @@ import datetime
 import pandas as pd
 import json
 import numpy as np
+import requests
 from sklearn.preprocessing import LabelEncoder,OneHotEncoder
-#import  textblob, string
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
-
 import re
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Model
+from keras.models import load_model
+import pickle
 
 # authentication
 reddit = praw.Reddit(client_id='wwoXPcv380hcfQ', 
@@ -62,12 +63,12 @@ def main():
 
 		#convert unix time to datetime stamp and get time features
 		df['created_utc'] =  pd.to_datetime(df['created_utc'], format='%Y-%m-%d %H:%M:%S')
-		df['month'] =  df['created_utc'].dt.month
-		df['year'] =  df['created_utc'].dt.year
-		df['day'] =  df['created_utc'].dt.day
-		df['hour'] =  df['created_utc'].dt.hour
-		df['weekday'] =  df['created_utc'].dt.weekday
-		df['weekday_name'] =  df['created_utc'].dt.day_name()
+		df['month'] =  [df['created_utc'].dt.month]
+		df['year'] =  [df['created_utc'].dt.year]
+		df['day'] =  [df['created_utc'].dt.day]
+		df['hour'] =  [df['created_utc'].dt.hour]
+		df['weekday'] =  [df['created_utc'].dt.weekday]
+		df['weekday_name'] =  [df['created_utc'].dt.day_name()]
 
 		# drop features which doesnt have variability
 		df.drop(['author_flair_css_class', 'is_meta', 'is_original_content','link_flair_css_class', \
@@ -98,7 +99,7 @@ def main():
 		Stop_Words = set(stopwords.words('english'))
 		Question_Words = ['what','which','who','whom','when''where','why','how']
 		Stop_Words_No_Question = [ w for w in Stop_Words if w not in Question_Words]
-		EMBEDDING_DIM = 300
+		EMBEDDING_DIM = 100
 
 		def cutter(word):
 			if (len(word) < 2):
@@ -138,9 +139,6 @@ def main():
 
 		data_1 = pad_sequences(tokenizer.texts_to_sequences(df['title_selftext']), maxlen=200)
 
-		nb_words = len(word_index) + 1
-		print('Vocabulary '+str(nb_words))
-
 		df['full_link_text'] = df['full_link_text'].apply(lambda x:  ' '.join([w for w in x.split('_')]))
 		df['full_link_text'] = df['full_link_text'].apply(lambda x: " ".join(x for x in x.split() \
 								if x in freq_words_list))
@@ -157,7 +155,7 @@ def main():
 		df['score_scale'] = score_scale.transform(df[['score']])   
 
 
-		lbl_domain = pickle.load(open('lbl_domain.sav', 'rb'))
+		lbl_domain = pickle.load(open('domain_enc.sav', 'rb'))
 
 		df['domain_enc'] = lbl_domain.transform(df['domain'])
 
@@ -177,10 +175,10 @@ def main():
 		X = np.concatenate((data_1,data_2, df[cols_to_use].values), axis=1) 
 
 
-		model.load_model('modelcheckpoint.h5')
+		model = load_model('dnn1_modelcheckpoint.h5')
 
 		preds = model.predict([X[:,:200], X[:,200:220], X[:,220:]],\
-							 batch_size=128, verbose=1)
+							 verbose=1)
 
 		#model.save('./'+key+'_'+'model.h5')
 
@@ -188,8 +186,8 @@ def main():
 
 		preds_label = list(flair_label_enc.inverse_transform(preds_label_enc))
 
-		return flask.render_template('main.html', original_input = feature, result = preds_label,)
+		return flask.render_template('main.html', original_input = feature, result = preds_label[0],)
 
 if __name__ == '__main__':
-	# app.debug=True
+	app.debug=True
 	app.run()

@@ -5,7 +5,9 @@ gunicorn
 pandas
 json
 numpy
+requests
 sklearn
 re
 nltk
 keras
+pickle

@@ -14,7 +14,7 @@ form {
 </head>
 <form action="{{ url_for('main') }}" method="POST">
     <fieldset>
-        <legend>Input values:</legend>
+        <legend>Enter Post Details:</legend>
         Post Link:
         <input name="post_url" type="string" required>
         <br>
@@ -25,11 +25,11 @@ form {
 <br>
 <div class="result" align="center">
     {% if result %}
-        {% for variable, value in original_input.items() %}
+        Predicted flair of post:
+           <p style="font-size:50px">{{ result }}</p>
+        <br>
+        <br>{% for variable, value in original_input.items() %}
             <b>{{ variable }}</b> : {{ value }} <br>
         {% endfor %}
-        <br>
-        <br> Predicted flair of post:
-           <p style="font-size:50px">{{ result }}</p>
     {% endif %}
 </div></html>
