@@ -8,4 +8,3 @@ requests
 sklearn
 nltk
 keras
-pickle
