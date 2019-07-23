@@ -8,4 +8,4 @@ requests
 sklearn
 nltk
 keras
-ternsorflow
+tensorflow
